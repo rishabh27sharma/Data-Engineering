@@ -1,0 +1,1140 @@
+select * from user_tab_columns;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select src.column_name src_col_name, tgt.column_name tgt_col_name,
+case when src.data_type=tgt.data_type then 'Matched' ELSE 'Not Matched' END data_type_status
+from (select column_name, data_type from all_tab_columns where table_name='SOURCE_CUSTOMERS') src
+JOIN
+(select column_name, data_type from all_tab_columns where table_name='TARGET_CUSTOMERS') tgt
+ON src.data_type=tgt.data_type and src.column_name=tgt.column_name;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+ALTER TABLE target_customers ADD email number;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select (length(src.cust_name) - length(tgt.cust_name)) as len_diff from source_customers src
+JOIN
+(select * from target_customers) tgt ON src.cust_id=tgt.cust_id;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select src.cust_name, length(src.cust_name) src_name_len, tgt.cust_name, length(tgt.cust_name) tgt_name_len,
+CASE WHEN length(src.cust_name)=length(tgt.cust_name) THEN 'True' ELSE 'False' END Length_Status from source_customers src
+FULL OUTER JOIN
+(select * from target_customers) tgt ON src.cust_id=tgt.cust_id;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+select cust_id, cust_name, mobile, age, city_id from source_customers
+minus
+select cust_id, cust_name, mobile, age, city_id from target_customers;
+
+UNION 
+
+select cust_id, cust_name, mobile, age, city_id from target_customers
+minus
+select cust_id, cust_name, mobile, age, city_id from source_customers;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+select * from all_tab_columns where owner=upper('rishabh') and table_name='CUSTOMER';
+
+update source_customers set cust_name='Nikhils' where cust_id=6;
+
+insert into target_customers values(7,'Ravi','9897777777',23,20);
+
+delete from customer where cust_id=7;
+
+select * from all_db_links;
+
+select * from customer;
+
+ALTER TABLE customer rename TO source_customers;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM V$TEMPFILE;
+SELECT * FROM V$DATAFILE;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select cust_id, cust_name, mobile, age, city_id from source_customers 
+where 1=1 and cust_id in (select cust_id from source_customers where age>25)
+minus
+select cust_id, cust_name, mobile, age, city_id from target_customers;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select * from user_tab_columns;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select src.column_name src_col_name, tgt.column_name tgt_col_name,
+case when src.data_type=tgt.data_type then 'Matched' ELSE 'Not Matched' END data_type_status
+from (select column_name, data_type from all_tab_columns where table_name='SOURCE_CUSTOMERS') src
+JOIN
+(select column_name, data_type from all_tab_columns where table_name='TARGET_CUSTOMERS') tgt
+ON src.column_name=tgt.column_name;
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+select src.column_name src_col_name, src.data_type src_data_type, tgt.column_name tgt_col_name, tgt.data_type tgt_data_type,
+case when src.data_type=tgt.data_type then 'Matched' ELSE 'Not Matched' END data_type_status
+from all_tab_columns src
+JOIN all_tab_columns tgt
+ON src.column_name=tgt.column_name
+WHERE src.table_name='SOURCE_CUSTOMERS' and tgt.table_name='TARGET_CUSTOMERS';	
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+ALTER TABLE target_customers ADD email number;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select (length(src.cust_name) - length(tgt.cust_name)) as len_diff from source_customers src
+JOIN
+(select * from target_customers) tgt ON src.cust_id=tgt.cust_id;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select src.cust_name, length(src.cust_name) src_name_len, tgt.cust_name, length(tgt.cust_name) tgt_name_len,
+CASE WHEN length(src.cust_name)=length(tgt.cust_name) THEN 'True' ELSE 'False' END Length_Status from source_customers src
+FULL OUTER JOIN
+(select * from target_customers) tgt ON src.cust_id=tgt.cust_id;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+select cust_id, cust_name, mobile, age, city_id from source_customers
+minus
+select cust_id, cust_name, mobile, age, city_id from target_customers;
+
+UNION 
+
+select cust_id, cust_name, mobile, age, city_id from target_customers
+minus
+select cust_id, cust_name, mobile, age, city_id from source_customers;
+
+select * from all_tab_columns where owner=upper('rishabh') and table_name='CUSTOMER';
+
+update source_customers set cust_name='Nikhils' where cust_id=6;
+
+insert into source_customers values(8,'Raj',null,null,null,null);
+
+delete from customer where cust_id=7;
+
+select * from all_db_links;
+
+select * from source_customers;
+select * from target_customers;
+
+ALTER TABLE customer rename TO source_customers;
+
+SELECT * FROM V$TEMPFILE;
+SELECT * FROM V$DATAFILE;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+WITH SOURCE_SERVICE_HISTORY  AS
+(
+select * from 
+(select row_number() over(order by cust_id) rnum, s.* FROM source_customers s)
+where rnum<3
+)
+
+select * from SOURCE_SERVICE_HISTORY;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE SERVICE_HISTORY_TEMP 
+AS 
+select * from 
+(select row_number() over(order by cust_id) rnum, s.* FROM source_customers s)
+where rnum<3;
+
+select * from SERVICE_HISTORY_TEMP;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select cust_id, cust_name, mobile, age, city_id from source_customers 
+where 1=1 and cust_id in (select cust_id from SOURCE_SERVICE_HISTORY)
+minus
+select cust_id, cust_name, mobile, age, city_id from target_customers
+where 1=1 and cust_id in (select cust_id from SOURCE_SERVICE_HISTORY);
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+select * from (SELECT row_number() over(order by cust_id) rnum, s.* FROM source_customers s)
+where rnum<=5;
+
+SELECT FLOOR( DBMS_RANDOM.VALUE(1,8)) * 10 AS value FROM DUAL;
+
+select * from(
+SELECT * FROM source_customers SAMPLE(10) ORDER BY dbms_random.value)
+where mobile is not null;
+
+SELECT 
+FLOOR( DBMS_RANDOM.VALUE( 0, 6) ) * 2 as RND,
+s.*
+From source_customers s
+Order by rnd;
+
+select * from
+(select row_number() over(order by cust_id) rnum, s.* FROM  source_customers s 
+) where rnum<2
+
+-------------------------------------------------------------------------------------------------
+SELECT LISTAGG (cust_name, ',') WITHIN GROUP (ORDER BY cust_name) 
+FROM source_customers;
+
+SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name)
+from all_tab_columns WHERE table_name='TARGET_CUSTOMERS';
+
+SELECT * FROM target_customers;
+
+ALTER TABLE target_customers RENAME COLUMN email TO tgt_email;
+
+SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name='SOURCE_CUSTOMERS';
+    
+---------------------------------------------------------------------------------------------------------------------------------------------
+create or replace procedure src_col_p
+as src_col_list VARCHAR2(500);
+   tgt_col_list VARCHAR2(500);
+begin
+SELECT SRC_COLUMN_LIST INTO src_col_list
+FROM (SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name='SOURCE_CUSTOMERS');
+
+SELECT TGT_COLUMN_LIST INTO tgt_col_list
+FROM (SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS TGT_COLUMN_LIST
+from all_tab_columns WHERE table_name='TARGET_CUSTOMERS');
+
+dbms_output.put_line(src_col_list);
+dbms_output.put_line(tgt_col_list);
+end;
+
+exec src_col_p;
+      
+---------------------------------------------------------------------------------------------------------------------------------------------
+-- PL/SQL
+DECLARE src_col_list varchar2(300);
+BEGIN
+--  src_col_listt:= 'RISHABH SHARMA';
+ SELECT SRC_COLUMN_LIST INTO src_col_list
+  FROM (SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+ FROM all_tab_columns WHERE table_name='SOURCE_CUSTOMERS');
+ dbms_output.put_line(src_col_list);
+END;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE column_lists (src_tab VARCHAR, tgt_tab VARCHAR)
+AS src_col_list VARCHAR2(500);
+   tgt_col_list VARCHAR2(500);
+begin
+SELECT SRC_COLUMN_LIST INTO src_col_list
+FROM (SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name=src_tab);
+
+SELECT TGT_COLUMN_LIST INTO tgt_col_list
+FROM (SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_name) AS TGT_COLUMN_LIST
+from all_tab_columns WHERE table_name=tgt_tab);
+
+dbms_output.put_line(src_col_list);
+dbms_output.put_line(tgt_col_list);
+end;
+
+exec column_lists('SOURCE_CUSTOMERS', 'TARGET_CUSTOMERS');
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION avg_salary
+RETURN INTEGER
+AS
+  avg_sal INTEGER;
+BEGIN
+SELECT round(avg(salary),2) INTO avg_sal FROM hr.employees; 
+RETURN avg_sal;
+END;
+
+SELECT avg_salary FROM DUAL;
+
+-------------------------------------------------------------------------------------------------------
+select * from DBA_TABLES WHERE TABLE_NAME IN (upper('source_customers'), upper('target_customers'));
+
+CREATE OR REPLACE PROCEDURE column_lists (src_tab VARCHAR, tgt_tab VARCHAR)
+AS  tab_name varchar2(200);
+    src_col varchar2(200);
+    dt_status varchar2(200);
+begin
+
+select t.table_name, t.column_name, data_type_status INTO tab_name, src_col, dt_status  FROM (
+select src.*,
+case when src.data_type=tgt.data_type then 'Matched' ELSE 'Not Matched' END data_type_status
+from all_tab_columns src
+JOIN all_tab_columns tgt
+ON src.column_name LIKE '%' || tgt.column_name || '%'
+WHERE src.table_name=src_tab and tgt.table_name=tgt_tab 
+)t WHERE data_type_status='Not Matched';
+
+
+dbms_output.put_line('TABLE NAME: ' || tab_name || ' COLUMN: ' || src_col || ' STATUS: ' || dt_status);
+
+end;
+
+exec column_lists('SOURCE_CUSTOMERS', 'TARGET_CUSTOMERS');
+
+------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE col_cnt_compare (src_tab VARCHAR, tgt_tab VARCHAR)
+AS src_cnt NUMBER;
+   tgt_cnt NUMBER;
+   diff NUMBER;
+BEGIN
+   select count(*) INTO src_cnt from user_tab_columns where table_name=src_tab;
+   
+   select count(*) INTO tgt_cnt from user_tab_columns where table_name=tgt_tab;
+   
+   diff:= src_cnt-tgt_cnt;
+   dbms_output.put_line('SOURCE COUNT: ' || src_cnt || ', TARGET COUNT: ' || tgt_cnt || ', Diff: ' || diff);
+END;
+
+EXEC col_cnt_compare('SOURCE_CUSTOMERS', 'TARGET_CUSTOMERS');
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE 
+ TYPE Arr IS VARRAY(11) OF NUMBER;
+   v_Numbers Arr := Arr(1,2,3,4,5,6,7,8,9,10,11);
+BEGIN
+  FOR i IN 1 .. 11
+   LOOP
+    dbms_output.put_line(v_Numbers(i));
+   END LOOP; 
+END;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE CURSOR c IS
+SELECT CUST_NAME, AGE FROM SOURCE_CUSTOMERS;
+rec c%rowtype;
+BEGIN
+  FOR rec IN c
+  LOOP
+  dbms_output.put_line(rec.cust_name || ' ' || rec.age);
+  END LOOP;
+END;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE
+cursor c1 is select cust_name, age from source_customers;
+vcust_name source_customers.cust_name%type;
+vage source_customers.age%type;
+BEGIN
+open c1;
+LOOP
+FETCH c1 INTO vcust_name, vage;
+EXIT WHEN c1%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE(vcust_name||' '||vage);
+END LOOP;
+CLOSE c1;
+END;
+
+----------------------------------------------------------------------------------------------------------------
+select t.table_name, t.column_name, src_len, tgt_len, data_length_status  FROM (
+select src.*, src.data_length src_len, tgt.data_length tgt_len,
+case when src.data_length=tgt.data_length then 'Matched' ELSE 'Not Matched' END data_length_status
+from all_tab_columns src
+JOIN all_tab_columns tgt
+ON src.column_name LIKE '%' || tgt.column_name || '%'
+WHERE src.table_name='SOURCE_CUSTOMERS' and tgt.table_name='TARGET_CUSTOMERS'
+and src.data_type not in ('DATE')
+)t;
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE data_length_comp (src_tab VARCHAR, tgt_tab VARCHAR)
+AS  tab_name VARCHAR2(200);
+    src_col VARCHAR2(200);
+    data_length_status VARCHAR2(200);
+BEGIN
+
+SELECT t.table_name, t.column_name, data_length_status INTO tab_name, src_col, data_length_status FROM (
+SELECT src.*, src.data_length src_len, tgt.data_length tgt_len,
+CASE WHEN src.data_length=tgt.data_length then 'Matched' ELSE 'Not Matched' END data_length_status
+FROM all_tab_columns src
+JOIN all_tab_columns tgt
+ON src.column_name LIKE '%' || tgt.column_name || '%'
+WHERE src.table_name=src_tab and tgt.table_name=tgt_tab
+and src.data_type in ('CHAR','NCHAR','VARCHAR','VARCHAR2','NVARCHAR','NVARCHAR2') 
+)t  WHERE data_length_status='Not Matched';
+
+
+DBMS_OUTPUT.PUT_LINE('TABLE NAME: ' || tab_name || ' COLUMN: ' || src_col || ' STATUS: ' || data_length_status);
+
+END;
+
+EXEC data_length_comp('SOURCE_CUSTOMERS', 'TARGET_CUSTOMERS');
+
+------------------------------------------------------------------------------------------------------------------
+CREATE TABLE MASTER_TABLE (
+  source_table_name VARCHAR2(30),
+  source_column_name VARCHAR2(30),
+  target_table_name VARCHAR2(30),
+  target_column_name VARCHAR2(30)
+);
+
+--TRUNCATE TABLE MASTER_TABLE;
+
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_CUST_ID', 'TARGET_CUSTOMERS', 'TGT_CUST_ID');
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_CUST_NAME', 'TARGET_CUSTOMERS', 'TGT_CUST_NAME');
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_MOBILE', 'TARGET_CUSTOMERS', 'TGT_MOBILE');
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_AGE', 'TARGET_CUSTOMERS', 'TGT_AGE');
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_CITY_ID', 'TARGET_CUSTOMERS', 'TGT_CITY_ID');
+INSERT INTO MASTER_TABLE VALUES('SOURCE_CUSTOMERS', 'SRC_EMAIL', 'TARGET_CUSTOMERS', 'TGT_EMAIL');
+
+SELECT * FROM MASTER_TABLE;
+----------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE SOURCE_TARGET_MAPPING
+AS 
+    tab_name varchar2(200);
+    src_col varchar2(200);
+    dt_status varchar2(200);
+BEGIN
+   FOR src_tgt_map
+      IN (SELECT source_table_name, source_column_name, target_table_name, target_column_name
+          FROM master_table)
+         
+   LOOP
+        select t.table_name, t.column_name, data_type_status INTO tab_name, src_col, dt_status  FROM (
+        select src.*,
+        case when src.data_type=tgt.data_type then 'Matched' ELSE 'Not Matched' END data_type_status
+        from all_tab_columns src
+        JOIN all_tab_columns tgt
+        ON src.column_name LIKE '%' || tgt.column_name || '%'
+        WHERE src.table_name=src_tgt_map.source_table_name and tgt.table_name=src_tgt_map.target_table_name
+        )t WHERE data_type_status='Not Matched';
+        
+        
+   END LOOP;
+       DBMS_OUTPUT.PUT_LINE('TABLE NAME: ' || tab_name || ' COLUMN: ' || src_col || ' STATUS: ' || dt_status);
+END SOURCE_TARGET_MAPPING;
+
+EXEC SOURCE_TARGET_MAPPING;
+
+-----------------------------------------------------------------------------------------------------------------------
+Nested tables
+
+DECLARE
+	TYPE stu IS TABLE OF VARCHAR2(10);
+	last_names stu;
+	total NUMBER;
+BEGIN
+	last_names := stu('RISHABH', 'PRIYANKA', 'SHARMA');
+	total := last_names.COUNT;
+	dbms_output.put_line('Total distinct name: '|| total);
+	FOR i IN 1 .. total LOOP
+			dbms_output.put_line(last_names(i));
+	END LOOP;
+END;
+
+-------------------------------------------------------------------------------------------------------------------------
+DYNAMIC SQL -> EXECUTE IMMEDIATE statement executes a dynamic SQL statement or anonymous PL/SQL block.
+
+CREATE OR REPLACE PROCEDURE xyz(tab1 varchar)
+AS tab2 VARCHAR2(100);
+sql_st varchar2(100);
+cname varchar2(100);
+r source_customers%rowtype;
+BEGIN
+sql_st := 'SELECT * FROM '|| tab1 ||' where rownum=1';
+DBMS_OUTPUT.PUT_LINE(sql_st);
+EXECUTE IMMEDIATE sql_st INTO r;
+DBMS_OUTPUT.PUT_LINE(r.cust_name || ' ' || r.age);
+END;
+
+exec XYZ('SOURCE_CUSTOMERS');
+
+-------------------------------------------------------------------------------------------------------------------------
+DATA PROFILING 
+
+select column_name, data_type, data_precision, data_scale, data_length, 
+CASE WHEN data_type='NUMBER' THEN utl_raw.cast_to_number(low_value)
+ELSE 0 END low_value_num,
+CASE WHEN data_type='NUMBER' THEN utl_raw.cast_to_number(high_value) 
+ELSE 0 END high_value_num, 
+CASE WHEN data_type='VARCHAR2' THEN utl_raw.cast_to_varchar2(low_value)
+ELSE '0' END low_value_char,
+CASE WHEN data_type='VARCHAR2' THEN utl_raw.cast_to_varchar2(high_value) 
+ELSE '0' END high_value_char,
+nullable as NULL_ALLOWED, density, num_nulls AS NULL_COUNT from all_tab_columns where table_name='SERVICE_HISTORY';
+
+SELECT ROUND(100.0 * (COUNT(*) - COUNT(member_id)) / COUNT(*),2) AS Null_Percentage from SERVICE_HISTORY;
+
+SELECT MAX(LENGTH(member_id)) AS string_length_max FROM SERVICE_HISTORY;
+
+SELECT MIN(LENGTH(member_id)) AS string_length_min FROM SERVICE_HISTORY;
+
+SELECT COUNT(*) AS row_count FROM SERVICE_HISTORY;
+
+SELECT * from all_tab_columns;
+
+---------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE VALIDATION_TESTS(
+ member_id VARCHAR2(22 BYTE) PRIMARY KEY,
+ pincode Number(6,0),
+ aadhaar_no Number(12,0),
+ email VARCHAR2(50)
+);
+
+INSERT INTO validation_tests VALUES(1,451666,879655362786,'jakegmail.com');
+INSERT INTO validation_tests VALUES(2,411057,784885536279,'jake@gmail.com');
+INSERT INTO validation_tests VALUES(3,400003,989877645325,'jake@gmail.com');
+INSERT INTO validation_tests VALUES(4,45157,9877765463,'jake@gmail.com');
+INSERT INTO validation_tests VALUES(5,433222,765655342516,'jakegmail.com');
+
+SELECT * FROM validation_tests;
+
+ALTER TABLE validation_tests ADD Mobile NUMBER(10,0);
+
+SELECT vt.*,
+CASE WHEN length(pincode)<>6 THEN 'INVALID' ELSE 'VALID' END pincode_validation,
+CASE WHEN length(aadhaar_no)<>12 THEN 'INVALID' ELSE 'VALID' END aadhaar_validation,
+CASE WHEN (email not like '%@%' or email not like '%.com') THEN 'INVALID' ELSE 'VALID' END email_validation,
+CASE WHEN length(mobile)<>10 THEN 'INVALID' ELSE 'VALID' END mobile_validation
+FROM validation_tests vt;
+
+CREATE TABLE vt AS 
+SELECT vt.*,
+CASE WHEN length(pincode)<>6 THEN 'INVALID' ELSE 'VALID' END pincode_validation,
+CASE WHEN length(aadhaar_no)<>12 THEN 'INVALID' ELSE 'VALID' END aadhaar_validation,
+CASE WHEN (email not like '%@%' or email not like '%.com') THEN 'INVALID' ELSE 'VALID' END email_validation,
+CASE WHEN length(mobile)<>10 THEN 'INVALID' ELSE 'VALID' END mobile_validation
+FROM validation_tests vt;
+
+SELECT count(*) FROM vt WHERE mobile_validation='INVALID';
+
+SELECT * FROM vt;
+
+--------------------------------------------------------------------------------------------------------------------
+
+DECLARE total_records Number;
+invalid_pin_percentage Number;
+invalid_aadhaar_percentage Number;
+invalid_email_percentage Number;
+invalid_mobile_percentage Number;
+BEGIN 
+SELECT COUNT(*) INTO total_records FROM vt;
+dbms_output.put_line('TOTAL RECORDS: ' || total_records);
+
+SELECT ROUND((count(*)/total_records)*100,2) INTO invalid_pin_percentage FROM vt WHERE pincode_validation='INVALID';
+dbms_output.put_line('INVALID PIN: ' || invalid_pin_percentage || '%');
+
+SELECT ROUND((count(*)/total_records)*100,2) INTO invalid_aadhaar_percentage FROM vt WHERE aadhaar_validation='INVALID';
+dbms_output.put_line('INVALID AADHAAR: ' || invalid_aadhaar_percentage ||'%');
+
+SELECT ROUND((count(*)/total_records)*100,2) INTO invalid_email_percentage FROM vt WHERE email_validation='INVALID';
+dbms_output.put_line('INVALID EMAIL: ' || invalid_email_percentage ||'%');
+
+SELECT ROUND((count(*)/total_records)*100,2) INTO invalid_mobile_percentage FROM vt WHERE mobile_validation='INVALID';
+dbms_output.put_line('INVALID MOBILE:' || invalid_mobile_percentage ||'%');
+END;
+
+-----------------------------------------------------------------------------------------------------------------------
+
+WITH cte as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name='SOURCE_CUSTOMERS' and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+),
+--select TRIM(',' FROM SRC_COLUMN_LIST) FROM cte;
+cte2 as(
+select regexp_substr (SRC_COLUMN_LIST, '[^,]+', 1, level ) value from cte
+connect by level <= length ( SRC_COLUMN_LIST ) - length ( replace ( SRC_COLUMN_LIST, ',' ) ) + 1
+),
+cte3 as (
+  select concat(concat('length(',value),')') len_cols from cte2
+)
+
+select len_cols from cte3;
+
+---------------------------------------------------------------------------------------------------------------------------
+
+DECLARE listcols VARCHAR2(100);
+TYPE arr IS TABLE OF NUMBER;
+len arr;
+abc NUMBER;
+sql_st VARCHAR2(200);
+BEGIN
+WITH cte as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name='SOURCE_CUSTOMERS' and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+),
+--select TRIM(',' FROM SRC_COLUMN_LIST) FROM cte;
+cte2 as(
+select regexp_substr (SRC_COLUMN_LIST, '[^,]+', 1, level ) value from cte
+connect by level <= length ( SRC_COLUMN_LIST ) - length ( replace ( SRC_COLUMN_LIST, ',' ) ) + 1
+),
+cte3 as (
+  select concat(concat('nvl(length(',value),'),0)') len_cols from cte2
+)
+SELECT list_cols INTO listcols FROM(
+SELECT LISTAGG(len_cols, '+') WITHIN GROUP (ORDER BY len_cols) AS list_cols FROM cte3);
+
+DBMS_OUTPUT.PUT_LINE(listcols);
+
+sql_st := 'SELECT ' || listcols || ' FROM source_customers';
+DBMS_OUTPUT.PUT_LINE(sql_st);
+EXECUTE IMMEDIATE sql_st BULK COLLECT INTO len;
+
+--DBMS_OUTPUT.PUT_LINE(len(1));
+
+FOR i IN len.first..len.last LOOP
+ DBMS_OUTPUT.PUT_LINE(len(i));
+END LOOP;
+
+END;
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+LENGTH VALIDATION
+
+DECLARE srclistcols VARCHAR2(100);
+tgtlistcols VARCHAR2(100);
+TYPE src_arr IS TABLE OF NUMBER;
+src_lengths src_arr;
+TYPE tgt_arr IS TABLE OF NUMBER;
+tgt_lengths tgt_arr;
+abc VARCHAR2(500);
+src_sql_st VARCHAR2(200);
+tgt_sql_st VARCHAR2(200);
+
+BEGIN
+WITH src_cte as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name='SOURCE_CUSTOMERS' and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+),
+src_cte2 as(
+select regexp_substr (SRC_COLUMN_LIST, '[^,]+', 1, level ) value from src_cte
+connect by level <= length ( SRC_COLUMN_LIST ) - length ( replace ( SRC_COLUMN_LIST, ',' ) ) + 1
+),
+src_cte3 as (
+  select concat(concat('nvl(length(',value),'),0)') src_len_cols from src_cte2
+)
+
+SELECT src_len_cols INTO srclistcols FROM(
+SELECT LISTAGG(src_len_cols, '+') WITHIN GROUP (ORDER BY src_len_cols) AS src_len_cols FROM src_cte3);
+
+WITH tgt_cte4 as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS TGT_COLUMN_LIST
+from all_tab_columns WHERE table_name='TARGET_CUSTOMERS' and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+), 
+tgt_cte5 as (
+select regexp_substr (TGT_COLUMN_LIST, '[^,]+', 1, level ) value from tgt_cte4
+connect by level <= length ( TGT_COLUMN_LIST ) - length ( replace ( TGT_COLUMN_LIST, ',' ) ) + 1
+),
+tgt_cte6 as (
+  select concat(concat('nvl(length(',value),'),0)') tgt_len_cols from tgt_cte5
+)
+
+SELECT tgt_len_cols INTO tgtlistcols FROM(
+SELECT LISTAGG(tgt_len_cols, '+') WITHIN GROUP (ORDER BY tgt_len_cols) AS tgt_len_cols FROM tgt_cte6);
+
+--DBMS_OUTPUT.PUT_LINE(srclistcols);
+--DBMS_OUTPUT.PUT_LINE(tgtlistcols);
+
+src_sql_st := 'SELECT ' || srclistcols || ' FROM source_customers';
+--DBMS_OUTPUT.PUT_LINE(src_sql_st);
+EXECUTE IMMEDIATE src_sql_st BULK COLLECT INTO src_lengths;
+
+FOR i IN src_lengths.first..src_lengths.last LOOP
+ DBMS_OUTPUT.PUT_LINE('SRCLEN: ' || src_lengths(i));
+END LOOP;
+
+tgt_sql_st := 'SELECT ' || tgtlistcols || ' FROM target_customers';
+--DBMS_OUTPUT.PUT_LINE(tgt_sql_st);
+EXECUTE IMMEDIATE tgt_sql_st BULK COLLECT INTO tgt_lengths;
+
+FOR i IN tgt_lengths.first..tgt_lengths.last LOOP
+ DBMS_OUTPUT.PUT_LINE('TGTLEN: ' || tgt_lengths(i));
+END LOOP;
+
+FOR i IN 1..src_lengths.COUNT LOOP
+ INSERT INTO len_comp VALUES(src_lengths(i),tgt_lengths(i));
+END LOOP;
+
+END;
+
+select lc.*, CASE WHEN (lc.source_len-lc.target_len)=0 THEN 'PASS' ELSE 'FAIL' END LENGTH_DIFF from len_comp lc;
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE comp_length(src_tab VARCHAR, tgt_tab VARCHAR)
+AS
+srclistcols VARCHAR2(100);
+tgtlistcols VARCHAR2(100);
+TYPE src_arr IS TABLE OF NUMBER;
+src_lengths src_arr;
+TYPE tgt_arr IS TABLE OF NUMBER;
+tgt_lengths tgt_arr;
+src_sql_st VARCHAR2(200);
+tgt_sql_st VARCHAR2(200);
+
+BEGIN
+WITH src_cte as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS SRC_COLUMN_LIST
+from all_tab_columns WHERE table_name=src_tab and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+),
+src_cte2 as(
+select regexp_substr (SRC_COLUMN_LIST, '[^,]+', 1, level ) value from src_cte
+connect by level <= length ( SRC_COLUMN_LIST ) - length ( replace ( SRC_COLUMN_LIST, ',' ) ) + 1
+),
+src_cte3 as (
+  select concat(concat('nvl(length(',value),'),0)') src_len_cols from src_cte2
+)
+
+SELECT src_len_cols INTO srclistcols FROM(
+SELECT LISTAGG(src_len_cols, '+') WITHIN GROUP (ORDER BY src_len_cols) AS src_len_cols FROM src_cte3);
+
+WITH tgt_cte4 as (
+SELECT LISTAGG(column_name, ',') WITHIN GROUP (ORDER BY column_name) AS TGT_COLUMN_LIST
+from all_tab_columns WHERE table_name=tgt_tab and data_type IN ('CHAR','VARCHAR','VARCHAR2')
+), 
+tgt_cte5 as (
+select regexp_substr (TGT_COLUMN_LIST, '[^,]+', 1, level ) value from tgt_cte4
+connect by level <= length ( TGT_COLUMN_LIST ) - length ( replace ( TGT_COLUMN_LIST, ',' ) ) + 1
+),
+tgt_cte6 as (
+  select concat(concat('nvl(length(',value),'),0)') tgt_len_cols from tgt_cte5
+)
+
+SELECT tgt_len_cols INTO tgtlistcols FROM(
+SELECT LISTAGG(tgt_len_cols, '+') WITHIN GROUP (ORDER BY tgt_len_cols) AS tgt_len_cols FROM tgt_cte6);
+
+--DBMS_OUTPUT.PUT_LINE(srclistcols);
+--DBMS_OUTPUT.PUT_LINE(tgtlistcols);
+
+src_sql_st := 'SELECT ' || srclistcols || ' FROM ' || src_tab;
+--DBMS_OUTPUT.PUT_LINE(src_sql_st);
+EXECUTE IMMEDIATE src_sql_st BULK COLLECT INTO src_lengths;
+
+FOR i IN src_lengths.first..src_lengths.last LOOP
+ DBMS_OUTPUT.PUT_LINE('SRCLEN: ' || src_lengths(i));
+END LOOP;
+
+tgt_sql_st := 'SELECT ' || tgtlistcols || ' FROM ' || tgt_tab;
+--DBMS_OUTPUT.PUT_LINE(tgt_sql_st);
+EXECUTE IMMEDIATE tgt_sql_st BULK COLLECT INTO tgt_lengths;
+
+FOR i IN tgt_lengths.first..tgt_lengths.last LOOP
+ DBMS_OUTPUT.PUT_LINE('TGTLEN: ' || tgt_lengths(i));
+END LOOP;
+
+FOR i IN 1..src_lengths.COUNT LOOP
+ INSERT INTO len_comp VALUES(src_lengths(i),tgt_lengths(i));
+END LOOP;
+
+END;
+
+EXEC comp_length('SOURCE_CUSTOMERS', 'TARGET_CUSTOMERS');
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE Calculate_Null_Percentage(p_table_name IN VARCHAR2) 
+IS
+   v_sql_query VARCHAR2(4000);
+   v_temp_table_name VARCHAR2(30);
+BEGIN 
+    v_temp_table_name := 'Temp_Null_Percentage'; 
+   BEGIN
+       EXECUTE IMMEDIATE 'DROP TABLE ' || v_temp_table_name;
+   EXCEPTION
+       WHEN OTHERS THEN
+           NULL; 
+   END;
+   v_sql_query := 'CREATE TABLE ' || v_temp_table_name || ' (COLUMN_NAME VARCHAR2(100), NULL_COUNT NUMBER, NULL_PERCENTAGE NUMBER, MAX_LENGTH NUMBER, MIN_LENGTH NUMBER, ROW_COUNT NUMBER)';
+   EXECUTE IMMEDIATE v_sql_query;
+   FOR col IN (SELECT column_name FROM user_tab_columns WHERE table_name = p_table_name) LOOP
+       v_sql_query := 'INSERT INTO ' || v_temp_table_name || ' (COLUMN_NAME, NULL_COUNT, NULL_PERCENTAGE, MAX_LENGTH, MIN_LENGTH, ROW_COUNT) ' ||
+                      'SELECT ''' || col.column_name || ''', ' ||
+                      'SUM(CASE WHEN ' || col.column_name || ' IS NULL THEN 1 ELSE 0 END), ' ||
+                      'ROUND(SUM(CASE WHEN ' || col.column_name || ' IS NULL THEN 1 ELSE 0 END) / COUNT(*) * 100, 2), ' ||
+                      'MAX(LENGTH(' || col.column_name || ')), ' ||
+                      'MIN(LENGTH(' || col.column_name || ')), ' ||
+                      'COUNT(*) '||
+                      'FROM ' || p_table_name;
+       EXECUTE IMMEDIATE v_sql_query;
+   END LOOP;
+   DBMS_OUTPUT.PUT_LINE('Temporary table created successfully.');
+EXCEPTION
+   WHEN OTHERS THEN
+       DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+
+EXEC CALCULATE_NULL_PERCENTAGE('SERVICE_HISTORY');
+
+SELECT * FROM Temp_Null_Percentage;
+
+SELECT a.*, temp.max_length, temp.min_length, temp.null_count, temp.null_percentage, temp.row_count FROM (
+SELECT column_name, data_type, data_precision, data_scale, data_length, 
+CASE WHEN data_type='NUMBER' THEN utl_raw.cast_to_number(low_value)
+ELSE 0 END low_value_num,
+CASE WHEN data_type='NUMBER' THEN utl_raw.cast_to_number(high_value) 
+ELSE 0 END high_value_num, 
+CASE WHEN data_type='VARCHAR2' THEN utl_raw.cast_to_varchar2(low_value)
+ELSE '0' END low_value_char,
+CASE WHEN data_type='VARCHAR2' THEN utl_raw.cast_to_varchar2(high_value) 
+ELSE '0' END high_value_char,
+nullable as NULL_ALLOWED, density from all_tab_columns where table_name='SERVICE_HISTORY'
+) a
+LEFT JOIN Temp_Null_Percentage temp
+ON a.column_name=temp.column_name;
+--------------------------------------------------------------------------------------------------------------------------------
+
+-- Create the emp table
+CREATE TABLE emp (
+    id NUMBER(30),
+    emp_name VARCHAR2(100),
+    hire_date DATE
+);
+
+-- Create a PL/SQL package to generate dynamic INSERT statements
+CREATE OR REPLACE PACKAGE DynamicInsertPackage IS
+    -- Procedure to generate and execute dynamic INSERT statements
+    PROCEDURE generateInserts(p_num_records IN NUMBER);
+
+    -- Function to generate random numbers within a specified range
+    FUNCTION getRandomNumber(p_min IN NUMBER, p_max IN NUMBER) RETURN NUMBER;
+
+    -- Function to generate random strings of a specified length
+    FUNCTION getRandomString(p_length IN NUMBER) RETURN VARCHAR2;
+
+    -- Function to generate random dates within a specified range
+    FUNCTION getRandomDate(p_start_date IN DATE, p_end_date IN DATE) RETURN DATE;
+END DynamicInsertPackage;
+/
+
+CREATE OR REPLACE PACKAGE BODY DynamicInsertPackage IS
+    -- Procedure to generate and execute dynamic INSERT statements
+    PROCEDURE generateInserts(p_num_records IN NUMBER) IS
+        v_sql VARCHAR2(1000);
+        v_id NUMBER;
+        v_emp_name VARCHAR2(100);
+        v_hire_date DATE;
+    BEGIN
+        FOR i IN 1..p_num_records LOOP
+            -- Generate random values
+            v_id := getRandomNumber(1, 100);
+            v_emp_name := getRandomString(10);
+            v_hire_date := getRandomDate(TO_DATE('01-JAN-2000', 'DD-MON-YYYY'), SYSDATE);
+
+            -- Build INSERT statement
+            v_sql := 'INSERT INTO emp(id, emp_name, hire_date) VALUES (' || v_id || ', ''' || v_emp_name || ''', TO_DATE(''' || TO_CHAR(v_hire_date, 'DD-MON-YYYY') || ''', ''DD-MON-YYYY''))';
+
+            -- Execute INSERT statement
+            EXECUTE IMMEDIATE v_sql;
+        END LOOP;
+        COMMIT;
+    END generateInserts;
+
+    -- Function to generate random numbers within a specified range
+    FUNCTION getRandomNumber(p_min IN NUMBER, p_max IN NUMBER) RETURN NUMBER IS
+    BEGIN
+        RETURN FLOOR(DBMS_RANDOM.VALUE(p_min, p_max));
+    END getRandomNumber;
+
+    -- Function to generate random strings of a specified length
+    FUNCTION getRandomString(p_length IN NUMBER) RETURN VARCHAR2 IS
+        v_chars VARCHAR2(62) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        v_result VARCHAR2(100) := '';
+    BEGIN
+        FOR i IN 1..p_length LOOP
+            v_result := v_result || SUBSTR(v_chars, FLOOR(DBMS_RANDOM.VALUE(1, LENGTH(v_chars))), 1);
+        END LOOP;
+        RETURN v_result;
+    END getRandomString;
+
+    -- Function to generate random dates within a specified range
+    FUNCTION getRandomDate(p_start_date IN DATE, p_end_date IN DATE) RETURN DATE IS
+    BEGIN
+        RETURN TRUNC(p_start_date + DBMS_RANDOM.VALUE(0,1)*(p_end_date - p_start_date));
+    END getRandomDate;
+END DynamicInsertPackage;
+
+EXEC DYNAMICINSERTPACKAGE.generateinserts(1000);
+
+SELECT * FROM emp;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE v_chars VARCHAR2(62) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+v_result VARCHAR2(100) := '';
+v_random NUMBER;
+v_date DATE;
+BEGIN
+   v_random := FLOOR(DBMS_RANDOM.VALUE(1,LENGTH(v_chars)));
+   dbms_output.put_line(v_random);
+   v_result := SUBSTR(v_chars, FLOOR(DBMS_RANDOM.VALUE(1, LENGTH(v_chars))), 1);
+   dbms_output.put_line(v_result);
+   v_date := TO_DATE('01-JAN-2023', 'DD-MON-YYYY') + DBMS_RANDOM.VALUE(0,1)*(SYSDATE - TO_DATE('01-JAN-2023', 'DD-MON-YYYY'));
+   dbms_output.put_line(v_date);
+END;
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CEN_ANA_MONTHLY_TRANS (
+MONTHLY_ID	NUMBER(38,0) PRIMARY KEY, 
+YEARLY_ID	INT, 
+ACC_YEAR	NUMBER(4,0) NULL, 
+UAN	NUMBER(12,0), 
+MEMBER_ID	VARCHAR2(22 BYTE),
+MEMBER_SYS_ID	NUMBER(10,0), 
+TRAN_DATE	DATE NULL,
+TRAN_TYPE CHAR(1 BYTE) NULL,
+TRAN_SOURCE_TYPEID	NUMBER(2,0) NULL, 
+TRAN_SOURCE_VALUE	VARCHAR2(50 BYTE) NULL, 
+DUE_MONTH	VARCHAR2(20 BYTE), 
+WAGE_MONTH	VARCHAR2(20 BYTE) NULL, 
+EPS_WAGE	NUMBER(16,0) NULL, 
+EPF_WAGE	NUMBER(16,0) NULL,
+EDLI_WAGE	NUMBER(16,0) NULL, 
+GROSS_WAGE	NUMBER(16,0) NULL, 
+EE_TAX	NUMBER(36,2) NULL, 
+EE_NON_TAX	NUMBER(36,2) NULL,
+ER_NON_TAX	NUMBER(36,2) NULL, 
+EPS	NUMBER(36,2) NULL, 
+EPS_1_16 NUMBER(36,2) NULL, 
+EE_INT_TAX	NUMBER(36,2) NULL,
+EE_INT_NON_TAX	NUMBER(36,2) NULL, 
+ER_INT_NON_TAX	NUMBER(36,2) NULL,
+VPF	NUMBER(36,2) NULL,
+TRAN_CAT_ID	NUMBER(2,0) NULL,
+INT_MONTHS	NUMBER(2,0) NULL,  
+EE_TAX_WIC	NUMBER(10,3) NULL, 
+EE_NON_TAX_WIC	NUMBER(10,3) NULL,
+ER_NON_TAX_WIC	NUMBER(10,3) NULL, 
+INSERT_DATETIME	TIMESTAMP(6) DEFAULT SYSDATE, 
+SRC_MEMBER_ID	VARCHAR2(22 BYTE) NULL, 
+DEST_MEMBER_ID	VARCHAR2(22 BYTE) NULL,
+IS_NULLIFYING CHAR(1 BYTE) NULL,
+NULLIFIED_BY_MONTHLY_ID NUMBER(38,0),
+NCP_DAYS NUMBER(3,0) NULL,
+LATEST_SCHEDULER_ID NUMBER(12,0) NULL,
+ROW_HASH VARCHAR2(30) NULL
+)
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE col_list VARCHAR2(500);
+BEGIN   
+        FOR res IN (SELECT COLUMN_NAME, DATA_TYPE FROM all_tab_columns WHERE TABLE_NAME='EMP') LOOP
+            dbms_output.put_line(res.column_name || ' ' || res.data_type);
+        END LOOP;
+END; 
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE col_values VARCHAR2(12000);
+        
+        CURSOR col_cur IS
+        SELECT column_name, data_type
+        FROM user_tab_columns
+        WHERE table_name = 'EMP';
+BEGIN
+      FOR j IN col_cur LOOP
+            IF j.data_type IN ('NUMBER', 'FLOAT', 'INTEGER') THEN
+                col_values := col_values || FLOOR(DBMS_RANDOM.VALUE(1,100)) || ', ';
+            ELSIF j.data_type IN ('VARCHAR2', 'CHAR', 'NVARCHAR2', 'NCHAR') THEN
+                col_values := col_values || dbms_random.string('x',10) || ', ';
+            ELSIF j.data_type IN ('DATE') THEN
+                col_values := col_values || SYSDATE || ', ';
+            ELSE
+                dbms_output.put_line('Invalid!!');
+            END IF;
+       END LOOP;
+ 
+            -- Remove the trailing comma
+            col_values := SUBSTR(col_values, 1, LENGTH(col_values) - 2);
+            DBMS_OUTPUT.PUT_LINE(col_values);
+END;
+------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PACKAGE DynamicInsertPackage IS
+    -- Procedure to generate and execute dynamic INSERT statements
+    PROCEDURE generateInserts(p_num_records IN NUMBER, tab_name IN VARCHAR);
+
+    -- Function to generate random numbers within a specified range
+    FUNCTION getRandomNumber(p_min IN NUMBER, p_max IN NUMBER) RETURN NUMBER;
+
+    -- Function to generate random strings of a specified length
+    FUNCTION getRandomString(p_length IN NUMBER) RETURN VARCHAR2;
+
+    -- Function to generate random dates within a specified range
+    FUNCTION getRandomDate(p_start_date IN DATE, p_end_date IN DATE) RETURN DATE;
+    
+    FUNCTION getTimeStampDate RETURN TIMESTAMP;
+END DynamicInsertPackage;
+/
+
+CREATE OR REPLACE PACKAGE BODY DynamicInsertPackage IS
+    -- Procedure to generate and execute dynamic INSERT statements
+    PROCEDURE generateInserts(p_num_records IN NUMBER, tab_name IN VARCHAR) IS
+        v_sql VARCHAR2(30000);
+        col_list VARCHAR2(10000);
+        col_values VARCHAR2(30000);
+        
+        CURSOR col_cur IS
+        SELECT column_name, data_type, data_length
+        FROM user_tab_columns
+        WHERE table_name = tab_name order by column_id;
+        --col_rec col_cur%ROWTYPE;
+    BEGIN
+        SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_id) INTO col_list
+        FROM all_tab_columns WHERE table_name=tab_name;
+        
+        dbms_output.put_line(col_list);
+        
+        
+        
+       FOR i IN 1..p_num_records LOOP
+            -- Generate random values
+            FOR j IN col_cur LOOP
+            --dbms_output.put_line(j.data_type);
+            IF j.data_type IN ('NUMBER', 'FLOAT', 'INTEGER') THEN
+                col_values := col_values || FLOOR(DBMS_RANDOM.VALUE(1, 100)) || ', ';
+            ELSIF j.data_type IN ('VARCHAR2', 'CHAR', 'NVARCHAR2', 'NCHAR') THEN
+                col_values := col_values || '''' || substr(dbms_random.string('x', j.data_length),1,10) || '''' || ', ';
+            ELSIF j.data_type IN ('DATE') THEN
+                col_values := col_values || '''' || TRUNC(TO_DATE('01-JAN-2000', 'DD-MON-YYYY') + DBMS_RANDOM.VALUE(0,1)*(SYSDATE - TO_DATE('01-JAN-2000', 'DD-MON-YYYY'))) || '''' || ', ';
+            ELSIF j.data_type LIKE '%TIMESTAMP%' THEN
+                col_values := col_values || '''' || TO_CHAR(systimestamp, 'DD-MM-YYYY HH12:MI:SS') || '''' || ', ';
+            ELSE
+                dbms_output.put_line('Invalid!!');
+            END IF;
+            END LOOP;
+ 
+            -- Remove the trailing comma
+            col_values := SUBSTR(col_values, 1, LENGTH(col_values) - 2);
+            DBMS_OUTPUT.PUT_LINE(col_values);
+
+            -- Build INSERT statement
+            v_sql := 'INSERT INTO ' || tab_name || '(' || col_list || ') VALUES (' || col_values || ')';
+            
+            dbms_output.put_line(v_sql);
+            
+            -- Execute the INSERT statement
+            EXECUTE IMMEDIATE v_sql;
+            COMMIT;
+            col_values := '';
+       END LOOP;     
+       END generateInserts;
+
+    -- Function to generate random numbers within a specified range
+    FUNCTION getRandomNumber(p_min IN NUMBER, p_max IN NUMBER) RETURN NUMBER IS
+    BEGIN
+        RETURN FLOOR(DBMS_RANDOM.VALUE(p_min, p_max));
+    END getRandomNumber;
+
+    -- Function to generate random strings of a specified length
+    FUNCTION getRandomString(p_length IN NUMBER) RETURN VARCHAR2 IS
+        v_chars VARCHAR2(62) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        v_result VARCHAR2(100) := '';
+    BEGIN
+        FOR i IN 1..p_length LOOP
+            v_result := v_result || SUBSTR(v_chars, FLOOR(DBMS_RANDOM.VALUE(1, LENGTH(v_chars))), 1);
+        END LOOP;
+        RETURN v_result;
+    END getRandomString;
+
+    -- Function to generate random dates within a specified range
+    FUNCTION getRandomDate(p_start_date IN DATE, p_end_date IN DATE) RETURN DATE IS
+    BEGIN
+        RETURN TRUNC(p_start_date + DBMS_RANDOM.VALUE(0,1)*(p_end_date - p_start_date));
+    END getRandomDate;
+    
+    -- Function to generate timestamp 
+    FUNCTION getTimeStampDate RETURN TIMESTAMP IS
+    BEGIN
+        RETURN SYSDATE;
+    END getTimeStampDate;
+    
+END DynamicInsertPackage;
+
+EXEC DYNAMICINSERTPACKAGE.generateinserts(5, 'SERVICE_HISTORY');
+
+TRUNCATE TABLE CEN_ANA_MONTHLY_TRANS;
+SELECT * FROM SERVICE_HISTORY;
+ ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE TYPE pk_arr IS TABLE OF VARCHAR2(100);
+pk pk_arr;
+BEGIN
+SELECT column_name BULK COLLECT INTO pk FROM all_cons_columns WHERE constraint_name = (
+SELECT constraint_name FROM all_constraints 
+WHERE table_name = 'SERVICE_HISTORY' AND CONSTRAINT_TYPE = 'P');
+FOR i IN pk.first..pk.last LOOP
+    dbms_output.put_line(pk(i));
+END LOOP;
+END;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE SEQUENCE dynamic_insert_pk
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE; 
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE sp_dynamic_inserts(p_num_records IN NUMBER, tab_name IN VARCHAR) IS
+        v_sql VARCHAR2(30000);
+        col_list VARCHAR2(10000);
+        col_values VARCHAR2(30000);
+        TYPE pk_arr IS TABLE OF VARCHAR2(100);
+        pk pk_arr;
+        FLAG BOOLEAN := FALSE;
+        
+        CURSOR col_cur IS
+        SELECT column_name, data_type, data_length, data_precision
+        FROM all_tab_columns
+        WHERE table_name = tab_name order by column_id;
+        
+        --col_rec col_cur%ROWTYPE;
+    BEGIN
+        SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_id) INTO col_list
+        FROM all_tab_columns WHERE table_name=tab_name;
+        
+        --dbms_output.put_line(col_list); 
+        
+        SELECT column_name BULK COLLECT INTO pk FROM all_cons_columns WHERE constraint_name = (
+        SELECT constraint_name FROM all_constraints 
+        WHERE table_name = tab_name AND CONSTRAINT_TYPE = 'P');
+        
+        FOR i IN 1..p_num_records LOOP
+            -- Generate random values
+            FOR j IN col_cur LOOP
+            FLAG := FALSE;
+            --dbms_output.put_line(j.data_type);
+            IF j.column_name MEMBER OF pk THEN
+                    col_values := col_values || dynamic_insert_pk.nextval || ', ';
+                    FLAG := TRUE;
+            END IF;  
+            IF FLAG<>TRUE THEN        
+                IF j.data_type IN ('NUMBER', 'FLOAT', 'INTEGER') THEN 
+                    col_values := col_values || TRUNC(dbms_random.value(0,nvl(j.data_precision,j.data_length))) || ', ';
+                ELSIF j.data_type IN ('VARCHAR2', 'CHAR', 'NVARCHAR2', 'NCHAR') THEN
+                    col_values := col_values || '''' || substr(dbms_random.string('x', j.data_length),1,10) || '''' || ', ';
+                ELSIF j.data_type IN ('DATE') THEN
+                    col_values := col_values || '''' || TRUNC(TO_DATE('01-JAN-2000', 'DD-MON-YYYY') + DBMS_RANDOM.VALUE(0,1)*(SYSDATE - TO_DATE('01-JAN-2000', 'DD-MON-YYYY'))) || '''' || ', ';
+                ELSIF j.data_type LIKE '%TIMESTAMP%' THEN
+                    col_values := col_values || '''' || TO_CHAR(systimestamp, 'DD-MM-YYYY HH12:MI:SS') || '''' || ', ';
+                ELSE
+                    dbms_output.put_line('Invalid!!');
+                END IF;
+            END IF;    
+        END LOOP;
+            
+            -- Remove the trailing comma
+            col_values := SUBSTR(col_values, 1, LENGTH(col_values) - 2);
+            --DBMS_OUTPUT.PUT_LINE(col_values);
+
+            -- Build INSERT statement
+            v_sql := 'INSERT INTO ' || tab_name || '(' || col_list || ') VALUES (' || col_values || ')';
+            
+            dbms_output.put_line(v_sql);
+            
+            -- Execute the INSERT statement
+            EXECUTE IMMEDIATE v_sql;
+            COMMIT;
+            col_values := '';
+       END LOOP; 
+END;
+
+EXEC sp_dynamic_inserts(100, 'SOURCE');
+TRUNCATE TABLE SOURCE;
+SELECT * FROM SOURCE; 
+-------------------------------------------------------------------------------------------------------------------------------------
+

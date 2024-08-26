@@ -1,0 +1,1042 @@
+DATA TYPES :
+	VARCHAR2(size)
+	CHAR(size)
+	DATE -> DD-MM-YY
+	NUMBER(p,s) -> precision and scale
+	LONG
+	RAW -> BLOB, CLOB, NCLOB
+	ROW ID
+
+-------------------------------------------------------------------------------
+DATABASE OBJECTS: A database object in a relational database is a data structure used to either store or reference data.
+
+SCHEMA => A collection of logical structures of data or objects.
+schema name = user name
+
+SCHEMA OBJECTS => Logical structures created by the users.
+
+SCHEMA OBJECTS :> 
+
+1] TABLE -> rows and columns
+2] VIEW -> virtual table
+3] CONSTRAINT -> rules for restricting invalid data entry into tables
+4] INDEX -> for improving spped of data retrieval from tables
+5] SEQUENCE -> generate unique integers, used by multiple users and multiple tables
+6] SYNONYM -> alias for database objects
+7] MATERIALIZED VIEW -> real table filled by an sql query unlike views
+
+8] FUNCTIONS and PROCEDURES
+PL/SQL -> SQL + Procedural Programming
+Functions return some value, but procedures returns nothing
+
+9] TRIGGERS -> compiled program units stored in the database and executed with a specific event(insert, update, delete, create) BEFORE ON AFTER operations. 
+
+10] PACKAGES 
+11] DATABASE LINKS -> connections between two physical database servers
+
+NON-SCHEMA OBJECTS : directories, roles, tablespaces, users 
+
+TABLESPACES -> An Oracle database consists of one or more logical storage units called tablespaces, 
+              which collectively store all of the database's data.
+              Each tablespace in an Oracle database consists of one or more files called datafiles.
+--------------------------------------------------------------------------------
+COMMANDS :
+
+DESC table;
+
+INFO table;
+
+INFO+ table;
+
+SELECT * FROM EMPLOYEES;
+--------------------------------------------------------------------------------
+
+** Alias:
+
+SELECT first_name as Name,last_name as surname FROM employees;
+
+SELECT first_name as "My Name", email FROM employees;
+
+SELECT first_name as "My Name", email as "E-mail" FROM employees;
+
+SELECT 'My Name is Rishabh' as Output FROM dual;
+--------------------------------------------------------------------------------
+
+** Quote(q) Operator
+
+SELECT q'[My Name is Rishabh]' as "Quote Operator" FROM dual;
+
+SELECT q'[I'm using quote operator in sql statement]' as "Quote Operator" FROM dual;
+--------------------------------------------------------------------------------
+
+** DISTINCT & UNIQUE Operator
+
+->> They are used to eliminate the duplicate rows
+
+SELECT DISTINCT job_id FROM employees;
+
+SELECT UNIQUE job_id FROM employees;
+--------------------------------------------------------------------------------
+
+** Concatenation Operator
+
+->> Can be done by two vertical bars ||
+
+SELECT 'My Name is ' || first_name FROM employees;
+
+SELECT first_name || ' ' || last_name AS fullName FROM employees;
+--------------------------------------------------------------------------------
+
+** Arithmetic Expressions
+
+select first_name, salary, salary*12 as annual_salary from employees;
+
+select sysdate + 3 from dual;
+
+select first_name, hire_date, hire_date + 5 from employees;
+
+->> Arithmetic operations with null values return NULL
+
+select salary, salary * commission_pct, commission_pct from employees;
+--------------------------------------------------------------------------------
+
+** RESTRICTING DATA
+
+# WHERE CLAUSE
+
+select * from employees where salary > 15000;
+
+select * from employees where job_id = 'IT_PROG';
+
+select * from employees where salary <> 10000;
+
+select * from employees where hire_date > '01-JAN-07';
+
+select * from employees where hire_date = '21-05-07';
+
+--------------------------------------------------------------------------------
+# BETWEEN ...AND OPERATOR
+
+->>Retrieves data between specified lower limit and upper limit
+->>the lower limit and upper limit is included!
+
+select * from employees where salary BETWEEN 10000 AND 12000;
+
+select * from employees where hire_date BETWEEN '07-JAN-05' AND '07-MAY-05';
+--------------------------------------------------------------------------------
+
+# IN Operator
+
+select * from employees where employee_id IN (101, 132, 65, 105);
+
+select * from employees where first_name IN ('David', 'Steven', 'Adam');
+
+select * from employees where hire_date IN ('17-JUN-03', '05-AUG-08', '27-MAY-07')
+--------------------------------------------------------------------------------
+
+# LIKE Operator
+
+Oracle Wildcard Operators -> 
+%(percentage) -> Matches any no. of characters including zero or more
+_(underscore) -> Matches exactly one character
+
+select * from employees where job_id like 'SA%';
+
+select * from employees where first_name like 'A%';
+
+select * from employees where first_name like '%a';
+
+select * from employees where first_name like '_r%';
+--------------------------------------------------------------------------------
+
+# IS NULL, IS NOT NULL Operator
+
+select * from employees where manager_id is null;
+
+select * from employees where commission_pct is not null;
+--------------------------------------------------------------------------------
+
+# LOGICAL Operators (AND, OR, NOT)
+
+select * from employees where job_id = 'ST_CLERK' AND salary > 3000;
+
+select * from employees where job_id = 'SA_REP' AND salary > 10000 AND first_name='Lisa';
+
+select * from employees where job_id = 'SA_REP' OR salary > 13000;
+
+select * from employees where salary > 11000 AND job_id NOT IN ('SA_REP', 'SA_MAN');
+--------------------------------------------------------------------------------
+
+# ORDER BY CLAUSE
+
+SELECT first_name, last_name, salary FROM employees ORDER BY first_name;
+
+SELECT first_name, last_name, salary, (salary * 12) as annual_salary FROM employees ORDER BY annual_salary;
+
+SELECT first_name, last_name, salary, (salary * 12) as annual_salary FROM employees ORDER BY 1;
+
+SELECT first_name, last_name, salary FROM employees ORDER BY first_name, last_name;
+
+SELECT first_name, last_name, salary FROM employees ORDER BY first_name desc;
+
+->> NULL values are displayed last in ascending order
+
+SELECT first_name, salary, commission_pct FROM employees ORDER BY commission_pct; 
+--------------------------------------------------------------------------------
+
+NULL FIRST and NULL LAST Operators
+
+SELECT first_name, salary, commission_pct FROM employees ORDER BY commission_pct NULLS FIRST; 
+
+SELECT first_name, salary, commission_pct FROM employees ORDER BY commission_pct DESC NULLS LAST;
+--------------------------------------------------------------------------------
+
+# ROWID -> Physical address of row on disk and ROWNUM in SQL
+
+ROWID is unique ID cannot be changed, ROWNUM can change
+
+SELECT first_name, last_name, salary, ROWID, ROWNUM FROM employees;
+
+SELECT first_name, last_name, salary, ROWID, ROWNUM FROM employees WHERE department_id = 80 AND ROWNUM <= 10;
+--------------------------------------------------------------------------------
+
+# Substitution Variable (user variable)
+->> The ampersand(&) is used before substitution variable in the query
+
+SELECT first_name, last_name, salary, department_id FROM employees where department_id = &dept_id;
+
+SELECT first_name, last_name, salary, department_id FROM employees where first_name = '&name';
+
+SELECT first_name, last_name, salary, department_id FROM employees WHERE salary BETWEEN &&sal AND &sal + 1000;
+--------------------------------------------------------------------------------
+
+*** FUNCTIONS 
+A] SINGLE ROW FUNCTIONS -> takes single input return output
+B] MULTI ROW FUNCTIONS (GROUP FUNCTIONS) -> takes multiple inputs return output
+
+
+# SINGLE ROW FUNCTIONS :
+1] Character Functions
+2] Number Functions
+3] Date Functions 
+4] Conversion Functions -> Convert one datatype to other
+5] General Functions -> mainly used to handle NULL values
+
+1] Character Functions
+-> There are two types:
+
+a] Case Conversion Functions -> convert upper case to lower case and vice versa
+   i) UPPER
+   ii) LOWER
+   iii) INITCAP -> converts first letter of each word to uppercase and rest to lowercase
+
+b] Character Manipulation Functions
+   i) SUBSTR(source_string, position[,length])  -> SUBSTR('Sql Course', 1, 3) -> Result Sql
+
+   ii) LENGTH(string) -> LENGTH('Sql Course') -> Result 10
+
+   iii) CONCAT(string1, string2) -> CONCAT('Sql', 'Course') -> Result SqlCourse
+
+   iv) INSTR(string, substring[,position, occurrence]) -> INSTR('Sql Course', 'o') -> Result 6
+
+   v) TRIM([[LEADING | TRAILING | BOTH] trim_character FROM] string) -> TRIM('   Sql Course  ') -> Result Sql Course
+      LTRIM | RTRIM(string, [trim_string]) -> LTRIM('   Sql Course  ') -> Result Sql Course
+					      RTRIM('   Sql Course  ') -> Result     Sql Course
+
+   vi) REPLACE(string, string_to_replace[, replacement_string]) -> REPLACE('Sql Course', 's', '*') -> Result Sql Cour*e
+
+   vii) LPAD | RPAD (string, target_length, padding_expression) -> LPAD('sql', 10, '-') -> Result -------sql
+                                                                   RPAD('sql', 10, '-') -> Result sql-------
+
+
+
+DISTINCT and UNIQUE OPERATOR (Similar)
+-> The DISTINCT Operator is a row-based operator. Only one DISTINCT operator is used in a SQL Query.
+
+select DISTINCT job_id from employees;
+select UNIQUE job_id from employees;
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+select * from all_tables;
+
+select * from all_users;
+
+CREATE USER rishabh IDENTIFIED BY password;
+CREATE USER 'someuser'@'localhost' IDENTIFIED BY 'somepassword';
+
+SHOW GRANTS FOR 'someuser'@'localhost';
+
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'someuser'@'localhost';
+
+# Create new connection with created user
+
+CREATE TABLE CUSTOMER(
+    cust_id number PRIMARY KEY,
+    cust_name varchar2(100) NOT NULL,
+    mobile number(10),
+    dob date,
+    city varchar2(100),
+    email varchar2(100)
+);
+
+
+SELECT * FROM CUSTOMER;
+
+DESC CUSTOMER;
+
+INSERT INTO CUSTOMER(cust_id, cust_name, mobile, dob, city, email)
+VALUES (1,'Rishabh', 8977787887, TO_DATE('27-05-1999', 'dd-mm-yyyy'), 'Pune', 'rishabh@gmail.com');
+
+INSERT INTO CUSTOMER(cust_id, cust_name, mobile, dob, city, email)
+VALUES (2,'Rohan', 9877787887, TO_DATE('03-10-2001', 'dd-mm-yyyy'), 'Jaipur', 'rohan@gmail.com');
+
+RENAME CUSTOMER TO CUSTOMERS;
+
+TRUNCATE TABLE CUSTOMERS;
+
+ALTER TABLE CUSTOMERS ADD Country varchar2(50);
+
+UPDATE CUSTOMERS SET country='India';
+
+ALTER TABLE CUSTOMERS DROP COLUMN city;
+
+ALTER TABLE CUSTOMERS ADD PRODUCT varchar2(100);
+
+ALTER TABLE CUSTOMERS DROP COLUMN PRODUCT;
+
+DELETE FROM CUSTOMERS WHERE city IS NULL;
+
+UPDATE CUSTOMERS SET cust_id=4 WHERE cust_name='nikhil';
+
+DROP TABLE CUSTOMERS;
+
+CREATE TABLE CUST_BACKUP AS SELECT * FROM CUSTOMERS;
+
+CREATE TABLE CUST_BACKUP1 AS SELECT * FROM CUSTOMERS WHERE 1=2; -> It will only create structure of table
+
+TRUNCATE TABLE CUSTOMERS;
+
+INSERT INTO CUSTOMERS (SELECT * FROM cust_backup);
+
+--------------------------------------------------------------------------------------------------------
+
+SQL 
+DDL(DATA DEFINITION LANGUAGE) -> CREATE, ALTER, RENAME, TRUNCATE, DROP (AUTO COMMIT)
+DML(DATA MANIPULATION LANGUAGE) -> INSERT, UPDATE, DELETE, MERGE (USER COMMIT)
+DRL(DATA RETRIEVAL LANGUAGE) -> SELECT
+TCL(TRANSACTION CONTROL LANGUAGE) -> COMMIT, ROLLBACK, SAVEPOINT
+DCL(DATA CONTROL LANGUAGE) -> GRANT, REVOKE
+
+--------------------------------------------------------------------------------------------------------
+
+# Constraints in Oracle -> Data Validation before inserting data into the table
+
+1. PRIMARY KEY -> Not Allow NULL, Duplicate value, Only one PK in a table
+2. NOT NULL -> allow duplicate
+3. UNIQUE -> not allow duplicate, allow NULL
+4. CHECK -> validation
+5. FOREIGN KEY -> Reference
+
+
+CREATE TABLE CITY(
+    city_id number PRIMARY KEY,
+    city_name varchar2(50)
+);
+
+INSERT INTO CITY VALUES(10,'Pune');
+INSERT INTO CITY VALUES(20,'Nashik');
+INSERT INTO CITY VALUES(30,'Mumbai');
+INSERT INTO CITY VALUES(40,'Indore');
+INSERT INTO CITY VALUES(50,'Delhi');
+
+SELECT * FROM CITY;
+
+
+CREATE TABLE CUSTOMER(
+    cust_id number PRIMARY KEY,
+    cust_name varchar2(100) NOT NULL,
+    mobile number(10) UNIQUE CHECK(length(mobile)=10),
+    age number(3) CHECK(age>=18),
+    city_id number,
+    FOREIGN KEY(city_id) REFERENCES CITY(city_id) 
+);
+
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(1,'Rishabh', 8938832938, 24, 10);
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(2,'Rohan', 9838832938, 22, 20);
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(3,'Ram', 9978832938, 31, 30);
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(4,'Rahul',7878832938, 28, 20);
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(5,'Shubham', 9038832938, 27, 10);
+INSERT INTO CUSTOMER (cust_id, cust_name, mobile, age, city_id) VALUES(6,'Nikhil', 8998832938, 21, 40);
+
+SELECT * FROM CUSTOMER;
+
+SELECT * FROM all_constraints WHERE OWNER='RISHABH' AND TABLE_NAME='CUSTOMER';
+
+SELECT * FROM all_cons_columns WHERE OWNER='RISHABH' AND TABLE_NAME='CUSTOMER';
+
+Combining Both Tables:
+SELECT a.owner, a.constraint_name, a.constraint_type, b.table_name, b.column_name from all_constraints a, all_cons_columns b 
+where a.constraint_name=b.constraint_name and a.OWNER='RISHABH' and a.TABLE_NAME='CUSTOMER';
+
+** ON DELETE CASCADE -> If we delete record from parent table it will also delete referencing record from child table as well.
+
+SELECT * FROM all_tables WHERE OWNER='RISHABH';
+
+SELECT * FROM all_tab_cols WHERE OWNER='RISHABH';
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+# ALIAS and CONCATENATION
+
+select employee_id as emp_id, concat(concat(first_name, ' '), last_name) as full_name,job_id, salary, department_id from employees; 
+
+						OR
+
+select employee_id emp_id, first_name || ' ' || last_name full_name,job_id, salary, department_id from employees;
+
+# COLUMN CALCULATION
+
+select employee_id emp_id, first_name || ' ' || last_name full_name,job_id,  hire_date, salary, (salary*12) as annual_salary, department_id from employees;
+
+# DISTINCT
+
+select distinct department_id from employees;
+
+select count(distinct department_id) from employees;
+
+# WHERE CLAUSE
+
+select * from employees where salary>5000;
+
+select * from employees where salary>5000 and salary<7000;
+
+select * from employees where salary between 5000 and 7000;
+
+select * from employees where salary not between 5000 and 7000;
+
+select * from employees where salary=7000;
+
+select * from employees where salary<>7000; NOT EQUAL TO
+
+select * from employees where department_id IN(30,60,90);
+
+select * from employees where department_id NOT IN(30,60,90);
+
+select * from employees where job_id IN('FI_ACCOUNT','ST_MAN');
+
+select * from employees where department_id=60 and salary>7000;
+
+select * from employees where department_id=60 or salary>7000;
+
+SELECT ROWNUM, ROWID, c.* FROM CUSTOMER c;
+
+SELECT ROWNUM, ROWID, e.* FROM EMPLOYEES e WHERE ROWNUM<=10;
+
+SELECT * FROM employees where commission_pct is not null;
+
+SELECT count(*) FROM employees where commission_pct is not null;
+
+SELECT employee_id, hire_date, to_char(hire_date, 'yyyy') FROM employees;
+
+SELECT employee_id, hire_date, to_char(hire_date, 'yyyy'), to_char(hire_date, 'mm'), 
+to_char(hire_date, 'MON'), to_char(hire_date, 'MONTH'), to_char(hire_date, 'dd'), to_char(hire_date, 'DAY') FROM employees;
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+AGGREGATE FUNCTIONS -> perform operations on multiple values and returns a single value, often used with GROUP BY & SELECT
+
+MIN(), MAX(), COUNT(), AVG(), SUM(), ROUND(value, digit)
+
+GROUP BY, HAVING CLAUSE
+
+EXTRACT Function
+SELECT EXTRACT (YEAR FROM hire_date), hire_date FROM employees;
+SELECT EXTRACT (MONTH FROM hire_date), hire_date FROM employees;
+SELECT EXTRACT (DAY FROM hire_date), hire_date FROM employees;
+
+
+SELF JOIN
+select e1.first_name ||' ' || e1.last_name as employeeName, e2.first_name ||' ' || e2.last_name as managerName 
+from employees e1 join employees e2 on e1.employee_id=e2.manager_id;
+
+UNION and UNION ALL 
+
+SELECT cust_name, mobile from customer
+UNION 
+SELECT cust_name, mobile from customers;
+
+SUB-QUERY
+select * from employees where salary > (select avg(salary) from employees);
+
+--------------------------------------------------------------------------------------------------------
+
+CASE Statement Syntax:
+
+CASE
+	WHEN condition1 THEN result1
+	WHEN condition3 THEN result2
+	WHEN condition3 THEN result3
+	ELSE other_result
+END; 
+
+CASE Expression Syntax:
+
+CASE Expression
+	WHEN value1 THEN result1
+	WHEN value2 THEN result2
+	WHEN valueN THEN resultN
+	ELSE other_result
+END; 
+
+
+--------------------------------------------------------------------------------------------------
+
+COMMON TABLE EXPRESSION(CTE) -> temporary named result set created from simple SELECT statement that can be used in subsequent SELECT statement
+-> We can define CTEs by adding a WITH clause directly before SELECT, INSERT, UPDATE, DELETE or MERGE Statement.
+-> The WITH clause can include one or more CTEs separated by commas
+ 
+Syntax:
+  
+WITH my_cte AS (
+	SELECT a,b,c FROM Table
+)
+SELECT a,c 
+FROM my_cte
+
+----------------------------------------------------------------------------------------------------
+
+NORMALIZATION -> Effectively Design a Database such that we Remove Data Redundancy
+
+1NF(First Normal Form)
+i) Every column/attribute need to have a single value
+ii) Each row should be unique. Either through a single or multiple columns. Not mandatory to have primary key.
+
+2NF(Second Normal Form)
+i) Must be in 1NF
+ii) All non key attributes must be fully dependent on candidate key.
+i.e. if a non-key column is partially dependent on candidate key (subset of columns forming candidate key) then split them into separate tables.  
+iii) Every table should have primary key and relationship between the tables should be formed using foreign key.
+
+
+Candidate Key -> set of columns which uniquely identify a record.
+A table can have multiple candidate keys because there can be multiple set of columns which uniquely identify a record/row in a table.
+
+Non-key Columns:
+Columns which are not part of the candidate key or primary key.
+
+Partial Dependency:
+If your candidate key is a combination of 2 columns(or multiple columns) then every non key column(columns which are not part of the candidate key) should be fully dependent on all columns.
+If there is any non key column which depends only on one of the candidate key columns then this results in partial dependency.  
+
+
+3NF(Third Normal Form)
+i) Must be in 2NF
+ii) Avoid Transitive dependencies.
+
+Transitive Dependency:
+Let's say you have a table T which has 3 columns namely A,B,and C.
+If A is functionally dependent on B and B is functionally dependent on C then we can say that is is functionally dependent on C.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+JOINS
+1] INNER JOIN / JOIN = Fetching matching records in both the tables based on the join condition
+2] LEFT JOIN / LEFT OUTER JOIN =  INNER JOIN + any additional records in left table
+3] RIGHT JOIN / RIGHT OUTER JOIN =  INNER JOIN + any additional records in right table
+4] FULL JOIN / FULL OUTER JOIN = INNER JOIN + all remaining records from left table + all remaining records from right table
+5] CROSS JOIN = returns a cartesian product. JOIN condition not required. Advantages -> Whenever you are having a table which basically cannot join with other tables but you still need to get information from that table
+6] NATURAL JOIN = SQL decide JOIN condition. Not to specify JOIN condition. Looks for column sharing same name.
+IN SQL, NATURAL JOIN will try to do a INNER JOIN if there are columns that are sharing same name between two tables. Let say if there are no columns that are sharing same name between two tables then it will do a CROSS JOIN. JOIN on all columns sharing same name. 
+7] SELF JOIN = When you JOIN a Table to itself.
+
+Example :
+select emp.first_name || ' ' || emp.last_name as EmpName,
+emp.salary as EmpSalary,
+emp.job_id as EmpJobID,
+mang.first_name || ' ' || mang.last_name as ManagerName,
+mang.salary as ManagerSalary,
+mang.job_id as ManagerJobID
+from employees emp join employees mang 
+on emp.manager_id=mang.employee_id;
+
+select child.name, child.age, parent.name, parent.age
+from family child
+join family parent on child.parent_id = parent.member_id
+
+--------------------------------------------------------------------------------------------------------------
+
+VIEW -> Database Object (Virtual Table)
+View is created over an SQL Query
+View does not store any data, just an representative of underlying SQL Query(structure).
+
+create view emp_details as select emp_id, first_name, salary from employees;
+
+select * from emp_details;
+
+Advantages:
+1) Security (By hiding the query used to generate the view)
+
+-> create a User
+-> grant select on emp_details to user;
+
+2) To simplify complex sql queries.
+-> Sharing view is better than sharing complex query.
+-> Avoid re-writing same complex query multiple times.
+
+# Using CREATE or REPLACE and Modifying a View
+
+create or replace view emp_details as select emp_id, first_name, salary from employees;
+
+Rule: 
+-> Cannot change column name used when creating view
+-> Cannot change column datatype
+-> Cannot change order of columns used during creation of view, at end we can add new columns
+
+
+alter view emp_details rename column salary to emp_salary;
+
+drop view emp_details;
+
+-> View stores the structure not data, will not show added column in table
+-> shows with latest data(records) but when comes to table structure, you will need to refresh view to see latest table structure
+
+# Updatable View
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Subquery in SQL -> SQL Query placed inside another SQL query.
+
+Q. Find the employees whose salary is greater than avg salary of all the employees.
+-> select * from employees where salary > (select avg(salary) from employees);
+
+3 Types:
+1> Scalar Subquery -> always returns 1 row and 1 column 
+
+Use in WHERE Clause
+select * from employees where salary > (select avg(salary) from employees);
+
+Use in FROM Clause
+select e.* from employees e join (select avg(salary) from employees) avg_sal
+on e.salary > avg_sal.sal;
+
+2> Multiple Row Subquery
+Two Types:
+i) subquery which returns multiple column and multiple row
+
+Q. Find the employees who earn the highest salary in each department.
+-> select * from employees where (dept_name, salary) in (select dept_name, max(salary) from employees group by dept_name);
+
+ii) subquery which returns only 1 column and multiple rows
+
+Q. Find department who do not have any employees
+-> select * from departments where dept_name not in (select distinct dept_name from employees);
+    
+3> Correlated Subquery -> subquery which is related to outer query. 
+-> Processing of subquery depends on the values returned from outer query.
+
+Q. Find the employees in each department who earn more than the average salary in that department.
+-> select * from employees e1 where salary > (select avg(salary) from employees e2 where e2.dept_name = e1.dept_name);
+
+Q. Find department who do not have any employees
+-> select * from departments d where not exists (select 1 from employees e where e.dept_name=d.dept_name);
+
+# Nested Subquery
+
+Q. Find stores whose sales were better than the average sales across all the stores
+i) find the total sales for each store
+ii) find avg sales for all the stores
+iii) compare 1 & 2
+
+*** When using same subquery multiple times in your query then use WITH Clause
+
+with sales as 
+	(select store_name, sum(price) as total_sales
+	 from sales 
+	 group by store_name)
+select * from sales
+join (select avg(total_sales) as sales x) avg_sales
+on sales.total_sales > avg_sales.sales; 
+
+# Different SQL Clause where subquery is allowed
+SELECT
+WHERE
+FROM
+HAVING
+
+# Using a subquery in SELECT Clause(Not good, try to avoid)
+
+Q. Fetch all the employee details and remarks to these employees who earns more than the average pay.
+
+select *,
+	(case when salary > (select avg(salary) from employees)
+		then 'Higher than average'
+		else null
+	end) as remarks
+from employees;
+
+** improvement
+
+select *,
+	(case when salary > avg_sal.sal 
+		then 'Higher than average'
+		else null
+	end) as remarks
+from employees
+cross join (select avg(salary) sal from employees) avg_sal;
+
+# Using a subquery in HAVING Clause
+
+Q. Find the stores who have sold more units than the average units sold by all stores.
+
+select store_name, sum(quantity) from sales group by store_name
+having sum(quantity) > select avg(quantity) from sales;
+
+
+# We can also use subquery in 
+INSERT
+UPDATE
+DELETE
+
+--- INSERT
+
+Q. Insert data to employees history table. Make sure not insert duplicate records.
+
+-> insert into employee_history
+   select e.emp_id, e.emp_name, de.dept_name, e.salary, d.location
+   from employee e
+   join department d on d.dept_name = e.dept_name
+   where not exists (select 1 from employee_history eh where eh.emp_id = e.emp_id);
+
+
+--- UPDATE
+Q. Give 10% increament to all employees in Bangalore location based 
+on the maximum salary earned by an emp in each dept. Only consider employees in employee_history table.
+
+-> update employee e 
+   set salary = (select max(salary) + (max(salary) * 0.1) 
+			from employee_history eh
+			where eh.dept_name = e.dept_name)	
+   where e.dept_name in (select dept_name from department where location='Bangalore')
+   and e.emp_id in (select emp_id from employee_history);
+
+
+--- DELETE
+Q. Delete all the departmets who do not have any employees
+delete from department where dept_name in 
+ (select * from departments d where not exists (select 1 from employees e where e.dept_name=d.dept_name));
+
+------------------------------------------------------------------------------------------------------------------------
+
+## Materialized View -> It is a database object
+-> created over a SQL Query
+
+Stores two things:
+i> Stores the SQL Query
+ii> Stores the data returned from the SQL Query (improves the performance of query)
+
+create materialized view mv_random_table
+as
+select id, avg(val), count(*)
+from random_table
+group by id;
+
+select * from mv_random_table;
+
+
+-> Data will not automatically updated, we have to refresh it manually.
+
+refresh materialized view mv_random_table;
+
+-----------------------------------------------------------------------------------------------------------------------
+
+PROCEDURE IN SQL -> Named block of code
+-> Stored in a database
+
+Can include: SQL Queries, DML, DDL, DCL, TCL, Collection types, cursors, loop, if-else, variables, exception handling etc.
+
+-> Created to give more power to SQL
+
+Syntax:
+create or replace procedure pr_name (p_name varchar, p_age int)
+as
+	variable
+begin
+	procedure body - all logics
+end;
+
+Example Products and Sales Table:
+
+create table products(
+    product_code varchar(20) primary key,
+    product_name varchar(50),
+    price float,
+    quatity_remaining int,
+    quatity_sold int
+);
+
+insert into products (product_code, product_name, price, quantity_remaining, quatity_sold)
+values ('P1', 'iPhone 13 Pro Max', 1000, 5, 195);
+
+select * from products;
+
+create table sales(
+    order_id int primary key,
+    order_date date,
+    product_code varchar(20),
+    quantity_ordered int,
+    sale_price float
+);
+
+insert into sales (order_id, order_date, product_code, quantity_ordered, sale_price)
+values (1, current_date, 'P1', 100, 120000);
+insert into sales (order_id, order_date, product_code, quantity_ordered, sale_price)
+values (2, current_date, 'P1', 50, 60000);
+insert into sales (order_id, order_date, product_code, quantity_ordered, sale_price)
+values (3, current_date, 'P1', 45, 540000);
+
+select * from sales;
+
+
+create or replace procedure pr_buy_products
+as
+	v_product_code varchar(20);
+	v_price float;
+begin
+	select product_code, price
+	into v_product_code, v_price
+	from products
+	where product_name = 'iPhone 13 Pro Max';
+
+	insert into sales (order_date, product_code, quantity_ordered, sales_price)
+	values (current_date, v_product_code, 1, (v_price * 1));
+
+	update products
+	set quantity_remaining = (quantity_remaining - 1),
+	    quantity_sold = (quantity_sold + 1)
+	where product_code = v_product_code;
+
+	dbms_output.put_line('Product Sold!');
+end;	
+
+--------------------------------------------------------------------------------------------------------
+SQL WINDOW FUNCTIONS(Analytic functions)
+
+ROW_NUMBER(), RANK(), DENSE_RANK(), LEG(), LEAD(), FIRST_VALUE(column), LAST_VALUE(column), NTH_VALUE, NTILE -> create buckets within partition, CUME_DIST, PERCENT_RANK
+
+FRAME => Subset of Partition
+Default Frame Clause -> range between unbounded preceding and current row
+
+change to -> range between unbounded preceding and unbounded following
+
+
+---------------------------------------------------------------------------------------------------------
+In Oracle 11g (use rownum instead of limit)
+select * from (select * from sales order by order_id desc) where rownum<=3;
+
+** Starting with Oracle 12c (12.1) there is a syntax available to limit rows or start at offsets.
+SELECT * 
+FROM   sometable
+ORDER BY name
+OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY;
+
+
+Conditions testing for ROWNUM values greater than a positive integer are always false. For example, this query returns no rows:
+
+SELECT * FROM employees
+    WHERE ROWNUM > 1;
+
+
+---------------------------------------------------------------------------------------------------------
+DECODE function in Standard Query Language (SQL) is used to add procedural IF – THEN – ELSE-like statements to a query.
+Decode in SQL function performs the task of CASE statements. 
+
+The DECODE function compares each expression2 to expression1. If expression1 is equal to expression2, or both expression1 and expression2 are null, the value of the result-expression is returned. If no expression2 matches expression1, the value of else-expression is returned. Otherwise a null value is returned.
+
+Read syntax diagram
+DECODE
+(
+expression1
+,
+expression2
+,
+result-expression
+,
+else-expression
+)
+---------------------------------------------------------------------------------------------------------
+
+A Cursor is a temporary memory that is allocated by the database server at the time of performing the Data Manipulation Language operations on a table, such as INSERT, UPDATE and DELETE etc.
+It is used to retrieve and manipulate data stored in the SQL table.
+
+---------------------------------------------------------------------------
+Hierarchical Query Operators
+Two operators, PRIOR and CONNECT_BY_ROOT, are valid only in hierarchical queries.
+
+Connect BY -> How to travers in a Tree
+START WITH -> Beginning of the hierarchy i.e. root of the tree 
+
+select employee_id, first_name, manager_id , prior first_name manager_name
+from employees
+start with manager_id is null
+connect by prior employee_id = manager_id order by 1;
+
+-----------------------------------------------------------------------------------------------------------
+Find Nth Highest Salary
+
+select department_id, salary from (
+select department_id, salary, dense_rank() over(partition by department_id order by salary desc) salary_rnk from employees
+) where salary_rnk=n;
+
+-----------------------------------------------------------------------------------------------------------
+You can create one table from another by adding a SELECT statement at the end of the CREATE TABLE statement:
+
+CREATE TABLE new_tbl [AS] SELECT * FROM orig_tbl;
+
+Create a new Table with only the structure copied from another table
+
+CREATE TABLE tab2 AS SELECT * FROM tab1 WHERE 1=0;
+
+-------------------------------------------------------------------------------------------------------------
+DATA DICTIONARY
+
+desc all_users;
+
+select username from all_users;
+
+desc user_tables;
+
+select table_name from user_tables;
+
+desc user_tab_columns;
+
+select table_name, column_name from user_tab_columns;
+
+desc user_constraints;
+
+select owner, constraint_name, constraint_type from user_constraints;
+
+desc user_views;
+
+select view_name from user_views; 
+
+desc user_sequences;
+
+select sequence_name from user_sequences; 
+
+desc user_indexes;
+
+select index_name, index_type, table_name from user_indexes;
+
+desc user_mviews;
+desc user_clusters;
+desc user_synonyms;
+desc user_source;
+desc user_procedures;
+desc user_triggers;
+
+desc user_tab_privs_recd;
+desc user_tab_privs_made;
+
+---------------------------------------------------------------------------
+SELECT * FROM V$NLS_PARAMETERS;
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
+---------------------------------------------------------------------------
+
+SEQUENCES -> DATABASE OBEJECT created to generate values for primary key columns.
+
+CREATE SEQUENCE <NAME>
+[START WITH <value>]
+[INCREAMENT BY <value>]
+[MAXVALUE <value>]
+[MINVALUE <value>]
+[CYCLE/NOCYCLE]
+[CACHE <SIZE>]
+
+Every Sequence will be having two pseudo columns: CURRVAL AND NEXTVAL -> generates next value and return it.
+---------------------------------------------------------------------------------------------------------------
+
+CURSORS -> Whenever you want to process row by row
+
+declare cursor
+open cursor
+fetch records
+close cursor
+
+Declaring
+cursor c1 is select * from employees;
+c1 => select * from employees;
+
+Open Cursor
+open <cursor_name>
+open c1;
+
+After we run open cursor
+1> The SELECT statement is submitted to Oracle server
+2> Oracle execute the query and data return by this query is loaded into temporary memory area it is called context area. It is created at PGA(Program Global Area).
+3> Cursor c1 points to this context area
+
+Fetching Records from CURSOR
+"FETCH" statement is used to fetch records from context area
+
+FETCH <cursor_name> INTO <variables>;
+
+fetch c1 into x,y,z;
+
+Closing Cursor
+close <cursor_name>;
+close c1;
+
+
+Example:
+DECLARE
+CURSOR c1 IS SELECT cust_name, age FROM source_customers;
+vcust_name source_customers.cust_name%type;
+vage source_customers.age%type;
+BEGIN
+OPEN c1;
+LOOP
+FETCH c1 INTO vcust_name, vage;
+EXIT WHEN c1%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE(vcust_name||' '||vage);
+END LOOP;
+CLOSE c1;
+END; 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+COLLECTIONS IN PL/SQL -> Group of Elements
+
+3 Types:
+1> PL/SQL Table or Index By Table
+2> VARRAY
+3> NESTED TABLE
+
+DECLARE TYPE
+DECLARE VARIABLE
+
+TYPE <type_name> IS TABLE OF datatype INDEX BY datatype;
+
+TYPE array IS TABLE OF NUMBER(4) INDEX BY binay_integer;
+
+x array;
+x(1) := 10;
+x(2) := 20;
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+PACKAGES -> Collection of Procedures, Functions, Variables, Types, Cursors etc.
+Related Procedures and Functions are grouped into single unit called Packages.
+Package supports Overloading -> In Package we can define two or more funtions and procedures with same name with different parameters.
+Package supports Hiding -> By default Public. We can make Private access within the Package.
+Package improves performance. Easy to manage.
+
+Consists of two Parts:
+Package Specification -> Declaration
+Package Body -> Definition
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+DBMS_RANDOM
+The DBMS_RANDOM package provides a built-in random number generator.
+
